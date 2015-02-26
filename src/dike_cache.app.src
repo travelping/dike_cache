@@ -1,0 +1,7 @@
+{application, dike_cache, [
+    {description, "Dike Cache"},
+    {mod, {dike_cache_app, []}},
+    {applications, [kernel, stdlib, dike]},
+    {registered, []},
+    {env, []}
+]}.

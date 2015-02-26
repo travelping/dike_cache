@@ -1,0 +1,8 @@
+*~
+*.aux
+*.log
+*.out
+*.toc
+*.beam
+*.app
+test-log
