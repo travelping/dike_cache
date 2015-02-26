@@ -22,7 +22,6 @@ start() ->
     application:ensure_all_started(dike_cache).
     
 start(_StartType, _StartArgs) ->
-    dike_test:local_init(),
     dike_cache_sup:start_link().
 
 stop(_State) ->

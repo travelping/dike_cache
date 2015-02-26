@@ -95,7 +95,7 @@ select(#ring{name = Name}, Options) ->
         key -> KeyTable;
         ttl -> TTLTable
     end,
-    ets:FoldFunction(fun(_, {C, Acc}) when (C < Offset) orelse (C >= Limit + Offset) ->
+    {Count, ResultList} = ets:FoldFunction(fun(_, {C, Acc}) when (C < Offset) orelse (C >= Limit + Offset) ->
                             {C + 1, Acc};
                         ({{_, Key}, _}, {C, Acc}) ->
                             case ets:lookup(KeyTable, Key) of
@@ -104,7 +104,8 @@ select(#ring{name = Name}, Options) ->
                             end;
                         (V, {C, Acc}) ->
                             {C + 1, [V | Acc]}
-                     end, {0, []}, Table).
+                     end, {0, []}, Table),
+    {Count, lists:reverse(ResultList)}.
 
 insert(Ring, Key, Value, TTL) ->
     Now = ?NOW,
