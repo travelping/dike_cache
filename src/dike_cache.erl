@@ -53,10 +53,10 @@ init_dike(Name, GroupCount, TableHolder, Table, TTLTable) ->
          ok = dike_dispatcher:request(VNode, {init, TableHolder, Table, TTLTable, GroupCount})
      end || VNode <- generate_paxos_groups(Name, GroupCount)].
 
-table_holder(Name, _GroupCount, Table, TTLTable) ->
+table_holder(Name, GroupCount, Table, TTLTable) ->
     Table = ets:new(Table, [ordered_set, public, named_table, {keypos, 1}, {read_concurrency, true}]),
     TTLTable = ets:new(TTLTable, [ordered_set, public, named_table, {keypos, 1}]),
-    proc_lib:spawn_link(fun() -> checker(Name, 500, TTLTable) end),
+    proc_lib:spawn_link(fun() -> checker(Name, GroupCount, 500, TTLTable) end),
     proc_lib:init_ack({ok, self()}),
     timer:sleep(infinity).
 
@@ -207,11 +207,11 @@ batch_read(Now, TTLTable, ETSAction, Acc) ->
             end
     end.
 
-checker(Name, Time, TTLTable) ->
+checker(Name, GroupCount, Time, TTLTable) ->
     TimeoutKeys = lists:reverse(batch_read(?NOW, TTLTable, fun() -> ets:first(TTLTable) end, [])),
-    [check_timed_out_key(Name, Key) || Key <- TimeoutKeys],
+    [check_timed_out_key(#ring{name = Name, groupcount = GroupCount}, Key) || Key <- TimeoutKeys],
     timer:sleep(Time),
-    checker(Name, Time, TTLTable).
+    checker(Name, GroupCount, Time, TTLTable).
 
 accumulate_row(Id, Count, TableName) ->
     ets:foldl(fun(V, Acc) ->
