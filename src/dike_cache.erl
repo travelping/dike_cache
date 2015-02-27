@@ -64,8 +64,8 @@ lookup(Ring, Key) ->
     case request(Ring, Key, {lookup, Key}) of
         [] ->
             undefined;
-        [{Key, Value, _, Till}] ->
-            {Key, Value, Till}
+        [{Key, Value, CreationTime, Till}] ->
+            {Key, Value, CreationTime, Till}
     end.
 
 dirty_lookup(Name, Key) ->

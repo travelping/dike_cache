@@ -71,8 +71,8 @@
 %% @@doc Looks up the cache for the given key.
 %% @todo Define return type.
 
--callback insert(Cache::cache(), Key::key(), Value::value(), TimeToLIve::time_until()) -> ok.
-%% @@doc Adds the given key with the current timestamp to the ring.
+-callback insert(Cache::cache(), Key::key(), Value::value(), TimeToLive::time_until()) -> ok.
+%% @@doc Adds the given key with the TTL.
 %% @todo Define return type.
 
 -spec new(Module::module(), Name::atom(), GroupCount::pos_integer()) -> Cache::cache().
@@ -80,9 +80,9 @@ new(Module, Name, GroupCount) ->
     {ok, _Child} = dike_cache_sup:start_child(Module, Name, GroupCount),
     Name.
 
-insert(Cache, Key, Value, Timeout) ->
+insert(Cache, Key, Value, TTL) ->
     {Module, Ring} = ring(Cache),
-    Module:insert(Ring, Key, Value, Timeout).
+    Module:insert(Ring, Key, Value, TTL).
 
 delete(Cache, Key) ->
     {Module, Ring} = ring(Cache),
