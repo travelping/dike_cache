@@ -17,7 +17,7 @@
 %%% API dike internal group
 -export([handle_call/3, handle_cast/2, init/1, init/2, export_state/1]).
 
--export([insert/4, lookup/2, dirty_lookup/2, delete/2, select/2, add_mili_seconds/2]).
+-export([insert/4, lookup/2, dirty_lookup/2, delete/2, select/2, add_mili_seconds/2, clear/1]).
 %%% bahaviour callbacks
 -export([start_link/2]).
 
@@ -112,6 +112,10 @@ insert(Ring, Key, Value, TTL) ->
     Till = add_mili_seconds(Now, TTL),
     request(Ring, Key, {insert, Key, Value, Now, Till}).
 
+clear(#ring{name = Name, groupcount = GroupCount}) ->
+    [begin
+        ok = dike_dispatcher:request(VNode, clear)
+     end || VNode <- generate_paxos_groups(Name, GroupCount)].
 
 %% ===================================================================
 %%% API Dike Internal Group

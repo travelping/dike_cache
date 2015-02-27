@@ -9,7 +9,7 @@
 
 %% @doc This module provides a behaviour abstraction of the distributed cache interface for various dike cache implementations.
 -module(dike_cache_api).
--export([new/3, insert/4, delete/2, lookup/2, select/2, clear/1]).
+-export([new/3, insert/4, delete/2, lookup/2, select/2, select/1, clear/1]).
 
 -include("dike_ring.hrl").
 
@@ -48,6 +48,9 @@
 %%       'direction' descending.
 
 %%% Note: as the  @doc directive below crashes edoc, it has be replaced by "@@doc"
+
+-callback select(Cache::cache()) -> [{key(), value(), time_to_live()}].
+%% @@doc Retrieve a list of all elements.
 
 -callback select(Cache::cache(), OptionList::[Option::option()]) -> [{key(), value(), time_to_live()}].
 %% @@doc Retrieve a list of elements according to the pattern defined by options.
@@ -88,6 +91,9 @@ delete(Cache, Key) ->
 lookup(Cache, Key) ->
     {Module, Ring} = ring(Cache),
     Module:lookup(Ring, Key).
+
+select(Cache) ->
+    select(Cache, []).
 
 select(Cache, Options) ->
     {Module, Ring} = ring(Cache),

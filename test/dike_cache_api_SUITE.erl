@@ -76,4 +76,6 @@ basic(_Config) ->
     {3, [{1, 10, _, infinity}]} = dike_cache_api:select(cache, [{direction, dsc}, {offset, 2}]),
     {3,[]} = dike_cache_api:select(cache, [{direction, dsc}, {offset, 1}, {limit, 0}]),
     {3,[{2, 20, _, infinity}]} = dike_cache_api:select(cache, [{direction, dsc}, {offset, 1}, {limit, 1}]),
-    {3,[{3, 30, _, infinity}]} = dike_cache_api:select(cache, [{direction, asc}, {offset, 2}, {limit, 1}]).
+    {3,[{3, 30, _, infinity}]} = dike_cache_api:select(cache, [{direction, asc}, {offset, 2}, {limit, 1}]),
+    dike_cache_api:clear(cache),
+    {0, []} = dike_cache_api:select(cache).
