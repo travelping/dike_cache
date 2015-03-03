@@ -3,5 +3,6 @@
     {mod, {dike_cache_app, []}},
     {applications, [kernel, stdlib, dike]},
     {registered, []},
+    {vsn, git},
     {env, []}
 ]}.

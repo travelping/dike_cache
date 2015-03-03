@@ -9,7 +9,7 @@
 
 %% @doc This module provides a behaviour abstraction of the distributed cache interface for various dike cache implementations.
 -module(dike_cache_api).
--export([new/3, insert/4, delete/2, lookup/2, select/2, select/1, clear/1]).
+-export([new/3, insert/4, delete/2, lookup/2, dirty_lookup/2, select/2, select/1, clear/1]).
 
 -include("dike_ring.hrl").
 
@@ -91,6 +91,10 @@ delete(Cache, Key) ->
 lookup(Cache, Key) ->
     {Module, Ring} = ring(Cache),
     Module:lookup(Ring, Key).
+
+dirty_lookup(Cache, Key) ->
+    {Module, _Ring} = ring(Cache),
+    Module:dirty_lookup(Cache, Key).
 
 select(Cache) ->
     select(Cache, []).
