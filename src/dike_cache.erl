@@ -134,17 +134,25 @@ init(Options) ->
     [TableNameBin, Group] = binary:split(atom_to_binary(GroupName, utf8), <<"-vnode-">>),
     {ok, #state{table_name = binary_to_atom(TableNameBin, utf8), group_id = binary_to_integer(Group)}}.
 
-init(#state{table_name = TableName, entries = Entries} = State, _Options) ->
-    ets:insert(TableName, Entries),
-    {ok, State#state{entries = []}}.
+init(State, _Options) ->
+    {ok, State}.
 
 export_state(#state{table_name = TableName, group_id = Id, group_count = Count} = State) ->
-    Entries = accumulate_row(Id, Count, TableName),
+    Entries = try accumulate_row(Id, Count, TableName) of
+        List when is_list(List) -> List;
+        _ -> []
+    catch _:_ -> [] end,
     State#state{entries = Entries}.
 
-handle_call({init, TableHolder, _, TTLTableName, GroupCount}, From, State) ->
-    (node() == node(TableHolder)) andalso link(TableHolder),
-    reply(From, ok, State#state{group_count = GroupCount, ttl_table_name = TTLTableName});
+handle_call({init, TableHolder, _, TTLTableName, GroupCount}, From, #state{entries = Entries} = State) ->
+    case node() == node(TableHolder) of
+        true ->
+            link(TableHolder),
+            ets:insert(TTLTableName, Entries);
+        false ->
+            ok
+    end,
+    reply(From, ok, State#state{group_count = GroupCount, ttl_table_name = TTLTableName, entries = []});
 
 handle_call(clear, From, State = #state{table_name = TableName}) ->
     ets:delete_all_objects(TableName),
